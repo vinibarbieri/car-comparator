@@ -22,12 +22,13 @@ export const ALLOWED_MAKE_NAMES = [
   'VW - VolksWagen',
 ]
 
-const FILTER_YEAR = '2022'
+const MIN_YEAR = 2022
 
 export function isAllowedMake(nome: string): boolean {
   return ALLOWED_MAKE_NAMES.some((n) => n.toLowerCase() === nome.toLowerCase())
 }
 
 export function isAllowedYear(codigo: string): boolean {
-  return codigo.startsWith(`${FILTER_YEAR}-`)
+  const year = parseInt(codigo.split('-')[0])
+  return year >= MIN_YEAR
 }
