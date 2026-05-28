@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { getMakes, getModels, getYears, getVehicle } from '@/lib/fipe/client'
+import { computeInsuranceRate, isDiscontinuedFromYears } from '@/lib/calc/insurance'
 import { useScenarioStore } from '@/store/scenarioStore'
 import type { FuelType, NewPurchase } from '@/store/types'
 import { formatCurrency, parseFipeValue } from '@/lib/utils'
@@ -51,7 +52,7 @@ export function AddPurchaseDialog() {
   const [condition, setCondition] = useState<'new' | 'used'>('used')
   const [acquisitionCost, setAcquisitionCost] = useState(0)
   const [annualInsurance, setAnnualInsurance] = useState(5000)
-  const [annualMaintenance, setAnnualMaintenance] = useState(3000)
+  const [annualMaintenance, setAnnualMaintenance] = useState(2000)
   const [annualKm, setAnnualKm] = useState(15000)
   const [fuelPrice, setFuelPrice] = useState(6.0)
   const [consumption, setConsumption] = useState(12)
@@ -85,7 +86,7 @@ export function AddPurchaseDialog() {
   const vehicle = vehicleQuery.data
 
   useEffect(() => {
-    if (vehicle) {
+    if (vehicle && yearsQuery.data) {
       const fipeValue = parseFipeValue(vehicle.Valor)
       setAcquisitionCost(fipeValue)
       const defaults = FUEL_DEFAULTS[vehicle.SiglaCombustivel]
@@ -93,8 +94,16 @@ export function AddPurchaseDialog() {
         setFuelPrice(defaults.price)
         setConsumption(defaults.consumption)
       }
+      const { annualPremium } = computeInsuranceRate({
+        fipeValue,
+        fuelType: fuelTypeFromSigla(vehicle.SiglaCombustivel),
+        makeName: vehicle.Marca,
+        yearId,
+        isDiscontinued: isDiscontinuedFromYears(yearsQuery.data),
+      })
+      setAnnualInsurance(annualPremium)
     }
-  }, [vehicle?.CodigoFipe])
+  }, [vehicle?.CodigoFipe, yearsQuery.data])
 
   function handleMakeChange(id: string) {
     setMakeId(id)
@@ -148,7 +157,7 @@ export function AddPurchaseDialog() {
     setCondition('used')
     setAcquisitionCost(0)
     setAnnualInsurance(5000)
-    setAnnualMaintenance(3000)
+    setAnnualMaintenance(2000)
     setAnnualKm(15000)
     setFuelPrice(6.0)
     setConsumption(12)
@@ -157,6 +166,17 @@ export function AddPurchaseDialog() {
   const fipeValue = vehicle ? parseFipeValue(vehicle.Valor) : 0
   const fuelSigla = vehicle?.SiglaCombustivel ?? 'G'
   const isElectric = fuelSigla === 'E'
+
+  const insuranceEstimate =
+    vehicle && yearsQuery.data
+      ? computeInsuranceRate({
+          fipeValue,
+          fuelType: fuelTypeFromSigla(fuelSigla),
+          makeName: vehicle.Marca,
+          yearId,
+          isDiscontinued: isDiscontinuedFromYears(yearsQuery.data),
+        })
+      : null
 
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : handleClose())}>
@@ -308,6 +328,14 @@ export function AddPurchaseDialog() {
                   value={annualInsurance}
                   onChange={(e) => setAnnualInsurance(parseFloat(e.target.value) || 0)}
                 />
+                {insuranceEstimate && (
+                  <p className="text-xs text-muted-foreground">
+                    {insuranceEstimate.effectiveRatePct.toFixed(1)}% ·{' '}
+                    {insuranceEstimate.category === 'premium' ? 'premium' : 'padrão'} ·{' '}
+                    {insuranceEstimate.ageYears} {insuranceEstimate.ageYears === 1 ? 'ano' : 'anos'}
+                    {insuranceEstimate.isDiscontinued ? ' · descontinuado' : ''}
+                  </p>
+                )}
               </div>
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">Manutenção (R$/ano)</Label>

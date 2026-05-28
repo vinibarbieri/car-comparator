@@ -51,7 +51,7 @@ export function AddVehicleDialog() {
 
   // Cost inputs
   const [annualInsurance, setAnnualInsurance] = useState(5000)
-  const [annualMaintenance, setAnnualMaintenance] = useState(3000)
+  const [annualMaintenance, setAnnualMaintenance] = useState(2000)
   const [annualKm, setAnnualKm] = useState(15000)
   const [fuelPrice, setFuelPrice] = useState(6.0)
   const [consumption, setConsumption] = useState(12)
@@ -144,7 +144,7 @@ export function AddVehicleDialog() {
     setModelId(null)
     setYearId('')
     setAnnualInsurance(5000)
-    setAnnualMaintenance(3000)
+    setAnnualMaintenance(2000)
     setAnnualKm(15000)
     setFuelPrice(6.0)
     setConsumption(12)
