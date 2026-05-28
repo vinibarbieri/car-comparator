@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { Trash2, Car } from 'lucide-react'
+import { Car } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -14,7 +13,7 @@ import { formatCurrency } from '@/lib/utils'
 type Props = { vehicle: OwnedVehicle }
 
 export function CurrentVehicleCard({ vehicle }: Props) {
-  const { updateOwnedVehicle, removeOwnedVehicle } = useScenarioStore()
+  const { updateOwnedVehicle } = useScenarioStore()
   const [sellMode, setSellMode] = useState<'price' | 'discount'>('price')
 
   const effectiveSalePrice =
@@ -42,14 +41,6 @@ export function CurrentVehicleCard({ vehicle }: Props) {
               </CardDescription>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground hover:text-destructive"
-            onClick={() => removeOwnedVehicle(vehicle.id)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
         </div>
 
         <div className="mt-3">

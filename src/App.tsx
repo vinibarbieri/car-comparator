@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useScenarioStore } from '@/store/scenarioStore'
 import { SEED_CONFIGS, buildSeedVehicle } from '@/store/seeds'
 import { CurrentVehicleCard } from '@/components/garage/CurrentVehicleCard'
-import { AddVehicleDialog } from '@/components/garage/AddVehicleDialog'
 import { NewPurchaseCard } from '@/components/purchases/NewPurchaseCard'
 import { AddPurchaseDialog } from '@/components/purchases/AddPurchaseDialog'
 import { TimelineSlider } from '@/components/dashboard/TimelineSlider'
@@ -134,21 +133,13 @@ export default function App() {
               <Loader2 className="h-4 w-4 animate-spin" />
               Carregando dados FIPE…
             </div>
-          ) : ownedVehicles.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground mb-4">
-              <Car className="h-12 w-12 mx-auto mb-3 opacity-20" />
-              <p className="text-sm">Nenhum veículo adicionado ainda.</p>
-              <p className="text-xs mt-1">Use o botão abaixo para adicionar seus veículos.</p>
-            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {ownedVehicles.map((vehicle) => (
                 <CurrentVehicleCard key={vehicle.id} vehicle={vehicle} />
               ))}
             </div>
           )}
-
-          <AddVehicleDialog />
         </section>
 
         <Separator />
