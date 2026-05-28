@@ -32,3 +32,11 @@ export function isAllowedYear(codigo: string): boolean {
   const year = parseInt(codigo.split('-')[0])
   return year >= MIN_YEAR
 }
+
+export function isZeroKmYear(codigo: string): boolean {
+  return codigo.startsWith('32000-')
+}
+
+export function formatYearDisplay(codigo: string, nome: string): string {
+  return isZeroKmYear(codigo) ? nome.replace('32000', 'Novo') : nome
+}

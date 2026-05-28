@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { getMakes, getModels, getYears, getVehicle } from '@/lib/fipe/client'
-import { isAllowedMake, isAllowedYear } from '@/lib/fipe/allowlist'
+import { isAllowedMake, isAllowedYear, formatYearDisplay } from '@/lib/fipe/allowlist'
 import { useScenarioStore } from '@/store/scenarioStore'
 import type { FuelType, OwnedVehicle } from '@/store/types'
 import { formatCurrency, parseFipeValue } from '@/lib/utils'
@@ -252,7 +252,7 @@ export function AddVehicleDialog() {
                   <SelectContent>
                     {yearsQuery.data?.filter((y) => isAllowedYear(y.codigo)).map((year) => (
                       <SelectItem key={year.codigo} value={year.codigo}>
-                        {year.nome}
+                        {formatYearDisplay(year.codigo, year.nome)}
                       </SelectItem>
                     ))}
                   </SelectContent>

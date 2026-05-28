@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { getMakes, getModels, getYears, getVehicle } from '@/lib/fipe/client'
-import { isAllowedMake, isAllowedYear } from '@/lib/fipe/allowlist'
+import { isAllowedMake, isAllowedYear, isZeroKmYear, formatYearDisplay } from '@/lib/fipe/allowlist'
 import { computeInsuranceRate, isDiscontinuedFromYears } from '@/lib/calc/insurance'
 import { useScenarioStore } from '@/store/scenarioStore'
 import type { FuelType, NewPurchase } from '@/store/types'
@@ -129,6 +129,11 @@ export function AddPurchaseDialog() {
     setModelId(parseInt(id))
     setYearId('')
     setNoYearsWarning(false)
+  }
+
+  function handleYearChange(id: string) {
+    setYearId(id)
+    if (isZeroKmYear(id)) setCondition('new')
   }
 
   function handleAdd() {
@@ -267,7 +272,7 @@ export function AddPurchaseDialog() {
               {yearsQuery.isLoading ? (
                 <LoadingRow label="Carregando anos…" />
               ) : (
-                <Select value={yearId} onValueChange={setYearId} disabled={!modelId}>
+                <Select value={yearId} onValueChange={handleYearChange} disabled={!modelId}>
                   <SelectTrigger>
                     <SelectValue
                       placeholder={modelId ? 'Selecione o ano' : 'Selecione o modelo primeiro'}
@@ -276,7 +281,7 @@ export function AddPurchaseDialog() {
                   <SelectContent>
                     {yearsQuery.data?.filter((y) => isAllowedYear(y.codigo)).map((year) => (
                       <SelectItem key={year.codigo} value={year.codigo}>
-                        {year.nome}
+                        {formatYearDisplay(year.codigo, year.nome)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -310,7 +315,7 @@ export function AddPurchaseDialog() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="new">Novo (0 km)</SelectItem>
+                  <SelectItem value="new">Novo</SelectItem>
                   <SelectItem value="used">Usado</SelectItem>
                 </SelectContent>
               </Select>

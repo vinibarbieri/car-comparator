@@ -90,7 +90,7 @@ export function NewPurchaseCard({ purchase }: Props) {
               value={purchase.condition}
               onChange={(e) => update({ condition: e.target.value as 'new' | 'used' })}
             >
-              <option value="new">Novo (0 km)</option>
+              <option value="new">Novo</option>
               <option value="used">Usado</option>
             </select>
           </div>
