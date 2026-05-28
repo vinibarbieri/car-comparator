@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { getMakes, getModels, getYears, getVehicle } from '@/lib/fipe/client'
+import { isAllowedMake, isAllowedYear } from '@/lib/fipe/allowlist'
 import { useScenarioStore } from '@/store/scenarioStore'
 import type { FuelType, OwnedVehicle } from '@/store/types'
 import { formatCurrency, parseFipeValue } from '@/lib/utils'
@@ -48,6 +49,7 @@ export function AddVehicleDialog() {
   const [makeId, setMakeId] = useState('')
   const [modelId, setModelId] = useState<number | null>(null)
   const [yearId, setYearId] = useState('')
+  const [noYearsWarning, setNoYearsWarning] = useState(false)
 
   // Cost inputs
   const [annualInsurance, setAnnualInsurance] = useState(5000)
@@ -95,15 +97,28 @@ export function AddVehicleDialog() {
     }
   }, [vehicle?.SiglaCombustivel])
 
+  // Reset model if it has no 2022 years
+  useEffect(() => {
+    if (!yearsQuery.data || modelId === null) return
+    const has2022 = yearsQuery.data.some((y) => isAllowedYear(y.codigo))
+    if (!has2022) {
+      setModelId(null)
+      setYearId('')
+      setNoYearsWarning(true)
+    }
+  }, [yearsQuery.data])
+
   function handleMakeChange(id: string) {
     setMakeId(id)
     setModelId(null)
     setYearId('')
+    setNoYearsWarning(false)
   }
 
   function handleModelChange(id: string) {
     setModelId(parseInt(id))
     setYearId('')
+    setNoYearsWarning(false)
   }
 
   function handleAdd() {
@@ -143,6 +158,7 @@ export function AddVehicleDialog() {
     setMakeId('')
     setModelId(null)
     setYearId('')
+    setNoYearsWarning(false)
     setAnnualInsurance(5000)
     setAnnualMaintenance(2000)
     setAnnualKm(15000)
@@ -181,7 +197,7 @@ export function AddVehicleDialog() {
                     <SelectValue placeholder="Selecione a marca" />
                   </SelectTrigger>
                   <SelectContent>
-                    {makesQuery.data?.map((make) => (
+                    {makesQuery.data?.filter((m) => isAllowedMake(m.nome)).map((make) => (
                       <SelectItem key={make.codigo} value={make.codigo}>
                         {make.nome}
                       </SelectItem>
@@ -215,6 +231,11 @@ export function AddVehicleDialog() {
                   </SelectContent>
                 </Select>
               )}
+              {noYearsWarning && (
+                <p className="text-xs text-amber-600">
+                  Este modelo não possui versões de 2022. Selecione outro modelo.
+                </p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -229,7 +250,7 @@ export function AddVehicleDialog() {
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {yearsQuery.data?.map((year) => (
+                    {yearsQuery.data?.filter((y) => isAllowedYear(y.codigo)).map((year) => (
                       <SelectItem key={year.codigo} value={year.codigo}>
                         {year.nome}
                       </SelectItem>
